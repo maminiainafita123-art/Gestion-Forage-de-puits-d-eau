@@ -35,7 +35,7 @@ Application web de gestion des demandes de forage permettant de suivre les clien
 ## Installation
 ```bash
 # 1. Cloner le projet
-git clone https://github.com/Fita456/forage
+git clone https://github.com/maminiainafita123-art/Gestion-Forage-de-puits-d-eau.git
 cd forage
 
 # 2. Créer la base de données PostgreSQL
