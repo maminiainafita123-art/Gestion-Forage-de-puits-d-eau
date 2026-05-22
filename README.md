@@ -1,6 +1,6 @@
 # Système de Gestion de Forage
 
-![Capture d'écran](./image/.png)
+![Capture d'écran](./image/image-Project.png)
 
 ## Description
 Application web de gestion des demandes de forage permettant de suivre les clients, les demandes, les devis et l'historique des statuts. Elle calcule automatiquement les durées estimées et réelles entre chaque changement de statut d'une demande.
