@@ -1,0 +1,11 @@
+-- ============================================
+-- SCRIPTS DE SUPPRESSION - PostgreSQL
+-- ============================================
+
+TRUNCATE TABLE demande_status RESTART IDENTITY CASCADE;
+TRUNCATE TABLE details_devis RESTART IDENTITY CASCADE;
+TRUNCATE TABLE devis RESTART IDENTITY CASCADE;
+TRUNCATE TABLE demandes RESTART IDENTITY CASCADE;
+TRUNCATE TABLE clients RESTART IDENTITY CASCADE;
+
+

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Modifier le Statut</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-pencil"></i> Modifier le Statut</h2>
+        <a th:href="@{/demande-status}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            
+            <!-- Infos non modifiables -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <i class="bi bi-lock"></i> Informations (non modifiables)
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Demande</label>
+                            <div class="form-control bg-light">
+                                #<span th:text="${demandeStatus.demande.id}"></span>
+                                - <span th:text="${demandeStatus.demande.lieu}"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Client</label>
+                            <div class="form-control bg-light" 
+                                 th:text="${demandeStatus.demande.client.nom}"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">District</label>
+                            <div class="form-control bg-light" 
+                                 th:text="${demandeStatus.demande.district}"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Statut</label>
+                            <div class="form-control bg-light">
+                                <span class="badge bg-info" 
+                                      th:text="${demandeStatus.status.libelle}"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Durées toujours affichées -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Durée Estimée</label>
+                            <div class="form-control bg-light">
+                                <i class="bi bi-clock text-primary"></i>
+                                <span th:text="${demandeStatus.dureeEstimer}"></span>h
+                                <small class="text-muted" 
+                                       th:text="'(' + ${demandeStatus.dureeEstimer / 24} + 'j ' + ${demandeStatus.dureeEstimer % 24} + 'h)'">
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Durée Réelle</label>
+                            <div class="form-control bg-light">
+                                <i class="bi bi-briefcase text-success"></i>
+                                <span th:text="${demandeStatus.dureeReel}"></span>h
+                                <small class="text-muted" 
+                                       th:text="'(' + ${demandeStatus.dureeReel / 8} + 'j ' + ${demandeStatus.dureeReel % 8} + 'h)'">
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Champs modifiables -->
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <i class="bi bi-pencil-square"></i> Champs modifiables
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/demande-status/update}" method="post">
+                        
+                        <input type="hidden" name="demandeStatusId" 
+                               th:value="${demandeStatus.id}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-calendar"></i> Date et Heure *
+                            </label>
+                            <input type="datetime-local" name="dateStatus" 
+                                   class="form-control"
+                                   th:value="${#temporals.format(demandeStatus.dateStatus, 'yyyy-MM-dd''T''HH:mm')}"
+                                   required>
+                            <small class="text-muted">
+                                Les durées seront recalculées automatiquement
+                            </small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-chat-text"></i> Commentaire
+                            </label>
+                            <textarea name="commentaire" class="form-control" rows="5"
+                                      placeholder="Modifier le commentaire..."
+                                      th:text="${demandeStatus.commentaire}"></textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-check-lg"></i> Sauvegarder
+                            </button>
+                            <a th:href="@{/demande-status}" class="btn btn-secondary">
+                                <i class="bi bi-x"></i> Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

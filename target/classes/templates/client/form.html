@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Formulaire - Clients</title>
+    
+    <!-- CSS spécifique si nécessaire -->
+    <style>
+        /* Styles supplémentaires si besoin */
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <h1><i class="bi bi-person-plus"></i> Formulaire - Clients</h1>
+
+    <form action="/clients/save" method="post" class="card p-4">
+        <input type="hidden" name="id" th:value="${client.id}" />
+        
+        <div class="mb-3">
+            <label for="nom" class="form-label">Nom:</label>
+            <input type="text" id="nom" name="nom" class="form-control" th:value="${client.nom}" required />
+        </div>
+        
+        <div class="mb-3">
+            <label for="contact" class="form-label">Contact:</label>
+            <input type="text" id="contact" name="contact" class="form-control" th:value="${client.contact}" required />
+        </div>
+        
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg"></i> Enregistrer
+            </button>
+            <a th:href="@{/clients}" class="btn btn-secondary">
+                <i class="bi bi-x-lg"></i> Annuler
+            </a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

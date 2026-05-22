@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Nouveau Devis</title>
+    <style>
+        /* Tableau éditable */
+        .editable-table td {
+            cursor: pointer;
+            padding: 8px 12px;
+            transition: background-color 0.2s;
+        }
+        .editable-table td:hover { background-color: #e3f2fd; }
+        .editable-table td.editing { padding: 0; background-color: #fff3cd; }
+        .editable-table td.editing input {
+            width: 100%;
+            border: 2px solid #007bff;
+            padding: 8px 12px;
+        }
+        .cell-placeholder { color: #aaa; font-style: italic; }
+        .total-cell { font-weight: bold; color: #28a745; background-color: #d4edda !important; }
+        
+        /* Récapitulatif */
+        .recap-card {
+            position: sticky;
+            top: 20px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .recap-section {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .recap-section:last-child { border-bottom: none; }
+        .recap-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .recap-section-title i { margin-right: 5px; }
+        .recap-label { color: #6c757d; font-size: 0.85rem; }
+        .recap-value { font-weight: 500; }
+        .recap-total-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .recap-total-value { font-size: 1.8rem; font-weight: bold; }
+        .recap-empty { color: #aaa; font-style: italic; font-size: 0.9rem; }
+        
+        /* Autocomplete */
+        .autocomplete-results {
+            position: absolute;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 250px;
+            overflow-y: auto;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .autocomplete-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .autocomplete-item:hover { background-color: #f8f9fa; }
+        
+        /* Bouton ajouter */
+        .btn-add-row {
+            border: 2px dashed #28a745;
+            color: #28a745;
+            background: transparent;
+            width: 100%;
+            padding: 10px;
+        }
+        .btn-add-row:hover { background: #28a745; color: white; }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <h2><i class="bi bi-receipt"></i> Nouveau Devis</h2>
+    
+    <form id="devisForm" th:action="@{/devis/save}" method="post">
+        
+        <div class="row">
+            
+            <!-- ==================== COLONNE GAUCHE ==================== -->
+            <div class="col-md-4">
+                
+                <!-- Formulaire -->
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-pencil"></i> Informations
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Demande (Autocomplete) -->
+                        <div class="mb-3">
+                            <label class="form-label">Demande *</label>
+                            <div class="position-relative">
+                                <input type="text" id="demandeSearch" class="form-control" 
+                                       placeholder="🔍 Rechercher client ou lieu..." autocomplete="off">
+                                <input type="hidden" name="demandeId" id="demandeId" required>
+                                <div id="demandeResults" class="autocomplete-results" style="display: none;"></div>
+                            </div>
+                            <div id="selectedDemande" class="mt-2 p-2 bg-success bg-opacity-10 rounded" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span id="selectedDemandeText" class="small text-success fw-bold"></span>
+                                    <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="clearDemande()">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Type de Devis -->
+                        <div class="mb-3">
+                            <label class="form-label">Type de Devis *</label>
+                            <select name="typeDevisId" id="typeDevisId" class="form-select" required onchange="updateRecap()">
+                                <option value="">-- Sélectionner --</option>
+                                <option th:each="t : ${typesDevis}" 
+                                        th:value="${t.id}" 
+                                        th:text="${t.libelle}"
+                                        th:data-libelle="${t.libelle}"></option>
+                            </select>
+                        </div>
+                        
+                        <!-- Statut -->
+                        <div class="mb-3">
+                            <label class="form-label">Changer le Statut</label>
+                            <select name="statusId" id="statusId" class="form-select" onchange="updateRecap()">
+                                <option value="">-- Ne pas changer --</option>
+                                <option th:each="s : ${statuses}" 
+                                        th:value="${s.id}" 
+                                        th:text="${s.libelle}"
+                                        th:data-libelle="${s.libelle}"></option>
+                            </select>
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> Ajouté à l'historique
+                            </small>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- ==================== RÉCAPITULATIF ==================== -->
+                <div class="card recap-card">
+                    <div class="card-header bg-dark text-white">
+                        <i class="bi bi-file-text"></i> RÉCAPITULATIF
+                    </div>
+                    
+                    <!-- Section Client -->
+                    <div class="recap-section" id="recapClientSection">
+                        <div class="recap-section-title">
+                            <i class="bi bi-person"></i> Client
+                        </div>
+                        <div id="recapClient">
+                            <span class="recap-empty">Sélectionnez une demande...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Demande -->
+                    <div class="recap-section" id="recapDemandeSection">
+                        <div class="recap-section-title">
+                            <i class="bi bi-file-earmark"></i> Demande
+                        </div>
+                        <div id="recapDemande">
+                            <span class="recap-empty">Sélectionnez une demande...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Devis -->
+                    <div class="recap-section">
+                        <div class="recap-section-title">
+                            <i class="bi bi-receipt"></i> Devis
+                        </div>
+                        <div id="recapDevis">
+                            <div class="row">
+                                <div class="col-6">
+                                    <span class="recap-label">Type:</span><br>
+                                    <span class="recap-value" id="recapTypeDevis">-</span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="recap-label">Nouveau statut:</span><br>
+                                    <span class="recap-value" id="recapStatut">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Détails -->
+                    <div class="recap-section">
+                        <div class="recap-section-title">
+                            <i class="bi bi-list-ul"></i> Détails
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="recap-label">Lignes</div>
+                                <div class="fs-4 fw-bold text-primary" id="recapNbLignes">0</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="recap-label">Articles</div>
+                                <div class="fs-4 fw-bold text-info" id="recapNbArticles">0</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="recap-label">Sous-total</div>
+                                <div class="fs-6 fw-bold text-secondary" id="recapSousTotal">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Total -->
+                    <div class="recap-total-section">
+                        <div class="small opacity-75 mb-1">MONTANT TOTAL</div>
+                        <div class="recap-total-value" id="recapTotal">0 Ar</div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            
+            <!-- ==================== COLONNE DROITE - TABLEAU ==================== -->
+            <div class="col-md-8">
+                
+                <div class="card">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-table"></i> Détails du Devis</span>
+                        <button type="button" class="btn btn-light btn-sm" onclick="ajouterLigne()">
+                            <i class="bi bi-plus"></i> Ajouter
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-bordered editable-table mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th width="40">#</th>
+                                    <th>Libellé</th>
+                                    <th width="120">Prix Unit.</th>
+                                    <th width="70">Qté</th>
+                                    <th width="130">Total</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailsBody"></tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="6" class="p-0">
+                                        <button type="button" class="btn-add-row" onclick="ajouterLigne()">
+                                            <i class="bi bi-plus-circle"></i> Cliquez pour ajouter une ligne
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="table-success">
+                                    <th colspan="4" class="text-end">TOTAL:</th>
+                                    <th id="tableTotal">0 Ar</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Boutons -->
+                <div class="d-flex gap-2 mt-3 justify-content-end">
+                    <a th:href="@{/devis}" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-x"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-lg"></i> Enregistrer le Devis
+                    </button>
+                </div>
+                
+            </div>
+            
+        </div>
+        
+        <!-- Inputs cachés -->
+        <div id="hiddenInputs"></div>
+        
+    </form>
+</div>
+
+<script th:inline="javascript">
+    // ==================== DONNÉES ====================
+    let ligneIndex = 0;
+    let tableData = [];
+    let selectedDemandeData = null; // Stocke les infos de la demande sélectionnée
+    
+    // ==================== AUTOCOMPLETE ====================
+    
+    const demandeSearch = document.getElementById('demandeSearch');
+    const demandeResults = document.getElementById('demandeResults');
+    const demandeIdInput = document.getElementById('demandeId');
+    
+    demandeSearch.addEventListener('input', function() {
+        const query = this.value;
+        if (query.length < 1) {
+            demandeResults.style.display = 'none';
+            return;
+        }
+        
+        fetch(`/devis/api/demandes?q=${encodeURIComponent(query)}`)
+            .then(r => r.json())
+            .then(data => {
+                demandeResults.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(d => {
+                        const div = document.createElement('div');
+                        div.className = 'autocomplete-item';
+                        div.innerHTML = `
+                            <div class="fw-bold">${d.clientNom}</div>
+                            <small class="text-muted">
+                                <i class="bi bi-geo-alt"></i> ${d.lieu} - ${d.district}
+                            </small><br>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar"></i> ${d.dateDemande} 
+                                <span class="badge bg-secondary ms-2">${d.statut}</span>
+                            </small>
+                        `;
+                        div.onclick = () => selectDemande(d);
+                        demandeResults.appendChild(div);
+                    });
+                } else {
+                    demandeResults.innerHTML = '<div class="p-3 text-muted text-center">Aucune demande trouvée</div>';
+                }
+                demandeResults.style.display = 'block';
+            });
+    });
+    
+    function selectDemande(d) {
+        // Stocker les données
+        selectedDemandeData = d;
+        
+        // Mettre à jour le formulaire
+        demandeIdInput.value = d.id;
+        demandeSearch.style.display = 'none';
+        demandeResults.style.display = 'none';
+        document.getElementById('selectedDemandeText').innerHTML = 
+            `<i class="bi bi-check-circle"></i> ${d.clientNom} - ${d.lieu}`;
+        document.getElementById('selectedDemande').style.display = 'block';
+        
+        // ✅ Mettre à jour le récapitulatif avec les infos client/demande
+        updateRecap();
+    }
+    
+    function clearDemande() {
+        selectedDemandeData = null;
+        demandeIdInput.value = '';
+        demandeSearch.value = '';
+        demandeSearch.style.display = 'block';
+        document.getElementById('selectedDemande').style.display = 'none';
+        updateRecap();
+    }
+    
+    document.addEventListener('click', e => {
+        if (!demandeSearch.contains(e.target) && !demandeResults.contains(e.target)) {
+            demandeResults.style.display = 'none';
+        }
+    });
+    
+    // ==================== TABLEAU ÉDITABLE ====================
+    
+    function ajouterLigne(libelle = '', prixUnitaire = 0, quantite = 1) {
+        tableData.push({
+            index: ligneIndex++,
+            libelle: libelle,
+            prixUnitaire: prixUnitaire,
+            quantite: quantite
+        });
+        renderTable();
+    }
+    
+    function renderTable() {
+        const tbody = document.getElementById('detailsBody');
+        tbody.innerHTML = '';
+        
+        if (tableData.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        <i class="bi bi-inbox fs-1"></i><br>
+                        Cliquez sur "Ajouter" pour commencer
+                    </td>
+                </tr>
+            `;
+        } else {
+            tableData.forEach((row, i) => {
+                const total = (row.prixUnitaire || 0) * (row.quantite || 0);
+                const tr = document.createElement('tr');
+                tr.className = 'detail-row';
+                tr.dataset.index = row.index;
+                
+                tr.innerHTML = `
+                    <td class="text-center text-muted">${i + 1}</td>
+                    <td data-field="libelle" onclick="startEdit(this)">
+                        <span class="${!row.libelle ? 'cell-placeholder' : ''}">
+                            ${row.libelle || 'Cliquez pour saisir...'}
+                        </span>
+                    </td>
+                    <td data-field="prixUnitaire" onclick="startEdit(this)" class="text-end">
+                        ${formatNumber(row.prixUnitaire || 0)} Ar
+                    </td>
+                    <td data-field="quantite" onclick="startEdit(this)" class="text-center">
+                        ${row.quantite || 1}
+                    </td>
+                    <td class="total-cell text-end">
+                        ${formatNumber(total)} Ar
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="supprimerLigne(${row.index})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        updateRecap();
+        updateHiddenInputs();
+    }
+    
+    function startEdit(cell) {
+        if (cell.classList.contains('editing')) return;
+        
+        const tr = cell.closest('tr');
+        const rowIndex = parseInt(tr.dataset.index);
+        const field = cell.dataset.field;
+        const row = tableData.find(r => r.index === rowIndex);
+        
+        const value = row[field] || (field === 'quantite' ? 1 : (field === 'prixUnitaire' ? 0 : ''));
+        const type = field === 'libelle' ? 'text' : 'number';
+        
+        cell.classList.add('editing');
+        cell.innerHTML = `<input type="${type}" value="${value}" 
+                                 ${type === 'number' ? 'min="0" step="0.01"' : ''}>`;
+        
+        const input = cell.querySelector('input');
+        input.focus();
+        input.select();
+        
+        input.onblur = () => finishEdit(cell, input, rowIndex, field);
+        input.onkeydown = e => {
+            if (e.key === 'Enter') { finishEdit(cell, input, rowIndex, field); moveNext(cell); }
+            if (e.key === 'Tab') { e.preventDefault(); finishEdit(cell, input, rowIndex, field); moveNext(cell, e.shiftKey); }
+            if (e.key === 'Escape') renderTable();
+        };
+    }
+    
+    function finishEdit(cell, input, rowIndex, field) {
+        let value = input.value;
+        if (field === 'prixUnitaire') value = parseFloat(value) || 0;
+        if (field === 'quantite') value = Math.max(1, parseInt(value) || 1);
+        
+        const row = tableData.find(r => r.index === rowIndex);
+        if (row) row[field] = value;
+        
+        renderTable();
+    }
+    
+    function moveNext(cell, reverse = false) {
+        const fields = ['libelle', 'prixUnitaire', 'quantite'];
+        const tr = cell.closest('tr');
+        const idx = fields.indexOf(cell.dataset.field);
+        
+        let nextTr = tr, nextField;
+        if (reverse) {
+            nextField = idx > 0 ? fields[idx - 1] : fields[2];
+            if (idx === 0) nextTr = tr.previousElementSibling;
+        } else {
+            nextField = idx < 2 ? fields[idx + 1] : fields[0];
+            if (idx === 2) nextTr = tr.nextElementSibling;
+        }
+        
+        if (nextTr && nextTr.classList.contains('detail-row')) {
+            const nextCell = nextTr.querySelector(`td[data-field="${nextField}"]`);
+            if (nextCell) setTimeout(() => startEdit(nextCell), 50);
+        }
+    }
+    
+    function supprimerLigne(index) {
+        tableData = tableData.filter(r => r.index !== index);
+        renderTable();
+    }
+    
+    // ==================== RÉCAPITULATIF COMPLET ====================
+    
+    function updateRecap() {
+        // ===== CLIENT =====
+        const recapClient = document.getElementById('recapClient');
+        if (selectedDemandeData) {
+            recapClient.innerHTML = `
+                <div class="mb-1">
+                    <span class="recap-label">Nom:</span>
+                    <span class="recap-value fw-bold">${selectedDemandeData.clientNom}</span>
+                </div>
+                <div>
+                    <span class="recap-label">Contact:</span>
+                    <span class="recap-value">${selectedDemandeData.clientContact || '-'}</span>
+                </div>
+            `;
+        } else {
+            recapClient.innerHTML = '<span class="recap-empty">Sélectionnez une demande...</span>';
+        }
+        
+        // ===== DEMANDE =====
+        const recapDemande = document.getElementById('recapDemande');
+        if (selectedDemandeData) {
+            recapDemande.innerHTML = `
+                <div class="row">
+                    <div class="col-6">
+                        <span class="recap-label">Date:</span><br>
+                        <span class="recap-value">${selectedDemandeData.dateDemande}</span>
+                    </div>
+                    <div class="col-6">
+                        <span class="recap-label">Statut:</span><br>
+                        <span class="badge bg-info">${selectedDemandeData.statut}</span>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="recap-label">Lieu:</span>
+                    <span class="recap-value">${selectedDemandeData.lieu}</span>
+                </div>
+                <div>
+                    <span class="recap-label">District:</span>
+                    <span class="recap-value">${selectedDemandeData.district}</span>
+                </div>
+            `;
+        } else {
+            recapDemande.innerHTML = '<span class="recap-empty">Sélectionnez une demande...</span>';
+        }
+        
+        // ===== TYPE DEVIS =====
+        const typeDevisSelect = document.getElementById('typeDevisId');
+        const selectedType = typeDevisSelect.options[typeDevisSelect.selectedIndex];
+        document.getElementById('recapTypeDevis').textContent = 
+            selectedType && selectedType.value ? selectedType.text : '-';
+        
+        // ===== NOUVEAU STATUT =====
+        const statusSelect = document.getElementById('statusId');
+        const selectedStatus = statusSelect.options[statusSelect.selectedIndex];
+        document.getElementById('recapStatut').textContent = 
+            selectedStatus && selectedStatus.value ? selectedStatus.text : 'Inchangé';
+        
+        // ===== DÉTAILS (TABLEAU) =====
+        let totalGeneral = 0;
+        let nbArticles = 0;
+        let nbLignes = 0;
+        
+        tableData.forEach(row => {
+            if (row.libelle && row.libelle.trim() !== '') {
+                const total = (row.prixUnitaire || 0) * (row.quantite || 0);
+                totalGeneral += total;
+                nbArticles += row.quantite || 0;
+                nbLignes++;
+            }
+        });
+        
+        // Mise à jour tableau
+        document.getElementById('tableTotal').textContent = formatNumber(totalGeneral) + ' Ar';
+        
+        // Mise à jour récapitulatif
+        document.getElementById('recapNbLignes').textContent = nbLignes;
+        document.getElementById('recapNbArticles').textContent = nbArticles;
+        document.getElementById('recapSousTotal').textContent = formatNumber(totalGeneral) + ' Ar';
+        document.getElementById('recapTotal').textContent = formatNumber(totalGeneral) + ' Ar';
+    }
+    
+    // ==================== INPUTS CACHÉS ====================
+    
+    function updateHiddenInputs() {
+        const container = document.getElementById('hiddenInputs');
+        container.innerHTML = '';
+        
+        tableData.forEach(row => {
+            if (row.libelle && row.libelle.trim() !== '') {
+                container.innerHTML += `
+                    <input type="hidden" name="libelles" value="${row.libelle}">
+                    <input type="hidden" name="prixUnitaires" value="${row.prixUnitaire || 0}">
+                    <input type="hidden" name="quantites" value="${row.quantite || 1}">
+                `;
+            }
+        });
+    }
+    
+    // ==================== UTILITAIRES ====================
+    
+    function formatNumber(num) {
+        return new Intl.NumberFormat('fr-FR').format(Math.round(num));
+    }
+    
+    // ==================== INITIALISATION ====================
+    
+    ajouterLigne();
+    updateRecap();
+    
+    // Validation
+    document.getElementById('devisForm').addEventListener('submit', function(e) {
+        document.querySelectorAll('.editing input').forEach(input => input.blur());
+        
+        if (!demandeIdInput.value) {
+            e.preventDefault();
+            alert('Veuillez sélectionner une demande');
+            return;
+        }
+        
+        if (!document.getElementById('typeDevisId').value) {
+            e.preventDefault();
+            alert('Veuillez sélectionner un type de devis');
+            return;
+        }
+        
+        const validRows = tableData.filter(r => r.libelle && r.libelle.trim());
+        if (validRows.length === 0) {
+            e.preventDefault();
+            alert('Veuillez ajouter au moins une ligne de détail');
+            return;
+        }
+        
+        updateHiddenInputs();
+    });
+</script>
+</body>
+</html>

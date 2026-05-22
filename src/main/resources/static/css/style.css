@@ -1,0 +1,918 @@
+/* ============================================
+   APPLICATION FORAGE - STYLES CSS COMPLETS
+   ============================================ */
+
+/* ============================================
+   1. VARIABLES & RESET
+   ============================================ */
+
+:root {
+    /* Couleurs principales */
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --dark-color: #343a40;
+    --light-color: #f8f9fa;
+    
+    /* Couleurs personnalisées */
+    --sidebar-bg: #343a40;
+    --sidebar-hover: #495057;
+    --sidebar-active: #007bff;
+    
+    /* Ombres */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 10px rgba(0,0,0,0.15);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.2);
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    
+    /* Bordures */
+    --border-radius: 5px;
+    --border-radius-lg: 10px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding: 0;
+}
+
+/* ============================================
+   2. SIDEBAR / NAVIGATION
+   ============================================ */
+
+.sidebar {
+    min-height: 100vh;
+    background-color: var(--sidebar-bg);
+    position: fixed;
+    width: 16.666667%; /* col-md-2 */
+    left: 0;
+    top: 0;
+    z-index: 100;
+    overflow-y: auto;
+    transition: var(--transition-normal);
+}
+
+.sidebar .logo {
+    padding: 20px 15px;
+    color: white;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar .logo h4 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.sidebar .logo i {
+    margin-right: 8px;
+}
+
+.sidebar a {
+    color: rgba(255,255,255,0.8);
+    padding: 15px 20px;
+    display: block;
+    text-decoration: none;
+    transition: var(--transition-fast);
+    border-left: 3px solid transparent;
+}
+
+.sidebar a:hover {
+    background-color: var(--sidebar-hover);
+    color: white;
+    border-left-color: var(--primary-color);
+}
+
+.sidebar a.active {
+    background-color: var(--sidebar-active);
+    color: white;
+    border-left-color: white;
+}
+
+.sidebar a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar hr {
+    border-color: rgba(255,255,255,0.1);
+    margin: 10px 15px;
+}
+
+/* Contenu principal */
+.content {
+    margin-left: 16.666667%;
+    padding: 20px 30px;
+    min-height: 100vh;
+}
+
+/* ============================================
+   3. CARTES (CARDS)
+   ============================================ */
+
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+    transition: var(--transition-normal);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    font-weight: 600;
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Cards du tableau de bord */
+.dashboard-card {
+    border-radius: var(--border-radius-lg);
+    color: white;
+    transition: transform var(--transition-normal);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+.dashboard-card .card-body {
+    padding: 25px;
+}
+
+.dashboard-card h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+.dashboard-card a {
+    color: rgba(255,255,255,0.9);
+    text-decoration: none;
+}
+
+.dashboard-card a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* ============================================
+   4. TABLES
+   ============================================ */
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    transition: var(--transition-fast);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0,123,255,0.05);
+}
+
+.table td, .table th {
+    vertical-align: middle;
+    padding: 12px 15px;
+}
+
+/* Table striped améliorée */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,0.02);
+}
+
+/* Actions dans les tables */
+.table .btn-sm {
+    padding: 5px 10px;
+    margin: 0 2px;
+}
+
+/* ============================================
+   5. TABLEAU ÉDITABLE (DEVIS)
+   ============================================ */
+
+.editable-table {
+    width: 100%;
+}
+
+.editable-table td {
+    position: relative;
+    cursor: pointer;
+    padding: 10px 12px;
+    transition: background-color var(--transition-fast);
+}
+
+.editable-table td:hover {
+    background-color: #e3f2fd;
+}
+
+.editable-table td.editing {
+    padding: 0;
+    background-color: #fff3cd;
+}
+
+.editable-table td.editing input {
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary-color);
+    padding: 10px 12px;
+    font-size: inherit;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.editable-table td .cell-value {
+    display: block;
+    min-height: 20px;
+}
+
+.editable-table td .cell-placeholder {
+    color: #aaa;
+    font-style: italic;
+}
+
+.editable-table .total-cell {
+    font-weight: bold;
+    color: var(--success-color);
+    background-color: #d4edda !important;
+    cursor: default;
+}
+
+.editable-table .detail-row {
+    transition: all var(--transition-normal);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.editable-table .detail-row:hover {
+    background-color: #f8f9fa;
+}
+
+/* Bouton ajouter ligne */
+.btn-add-row {
+    border: 2px dashed var(--success-color);
+    color: var(--success-color);
+    background: transparent;
+    width: 100%;
+    padding: 12px;
+    font-weight: 500;
+    transition: var(--transition-normal);
+    cursor: pointer;
+}
+
+.btn-add-row:hover {
+    background: var(--success-color);
+    color: white;
+}
+
+/* Message tableau vide */
+.empty-table-message {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+}
+
+.empty-table-message i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    display: block;
+    color: #ccc;
+}
+
+/* ============================================
+   6. FORMULAIRES
+   ============================================ */
+
+.form-label {
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.form-control, .form-select {
+    border-radius: var(--border-radius);
+    border: 1px solid #ced4da;
+    padding: 10px 15px;
+    transition: var(--transition-fast);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+}
+
+.form-control.is-invalid, .form-select.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.invalid-feedback {
+    font-size: 0.85rem;
+}
+
+/* Input group */
+.input-group .form-control {
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+}
+
+.input-group .btn {
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+/* ============================================
+   7. AUTOCOMPLETE
+   ============================================ */
+
+.autocomplete-wrapper {
+    position: relative;
+}
+
+.autocomplete-results {
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    max-height: 250px;
+    overflow-y: auto;
+    width: 100%;
+    box-shadow: var(--shadow-md);
+    display: none;
+}
+
+.autocomplete-results.show {
+    display: block;
+}
+
+.autocomplete-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: var(--transition-fast);
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover {
+    background-color: #f8f9fa;
+}
+
+.autocomplete-item .item-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.autocomplete-item .item-subtitle {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.autocomplete-empty {
+    padding: 20px;
+    text-align: center;
+    color: #888;
+}
+
+/* ============================================
+   8. RÉCAPITULATIF (DEVIS)
+   ============================================ */
+
+.recap-card {
+    position: sticky;
+    top: 20px;
+    border: none;
+    box-shadow: var(--shadow-md);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.recap-section {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.recap-section:last-child {
+    border-bottom: none;
+}
+
+.recap-section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #6c757d;
+    font-weight: bold;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.recap-section-title i {
+    margin-right: 5px;
+}
+
+.recap-label {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.recap-value {
+    font-weight: 500;
+    color: #333;
+}
+
+.recap-empty {
+    color: #bbb;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+/* Liste détails récap */
+.recap-detail-list {
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 8px;
+}
+
+.recap-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border-bottom: 1px dashed #ddd;
+    font-size: 0.85rem;
+}
+
+.recap-detail-item:last-child {
+    border-bottom: none;
+}
+
+.recap-detail-libelle {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 10px;
+}
+
+.recap-detail-qte {
+    color: #666;
+    margin-right: 10px;
+    font-size: 0.8rem;
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.recap-detail-total {
+    font-weight: bold;
+    color: var(--success-color);
+    white-space: nowrap;
+}
+
+.recap-detail-empty {
+    text-align: center;
+    color: #aaa;
+    padding: 20px;
+    font-style: italic;
+}
+
+.recap-detail-empty i {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+/* Stats récap */
+.recap-stats {
+    display: flex;
+    justify-content: space-around;
+    background: #f0f0f0;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    margin-top: 10px;
+}
+
+.recap-stat {
+    text-align: center;
+}
+
+.recap-stat-value {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.recap-stat-label {
+    font-size: 0.65rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Total récap */
+.recap-total-section {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.recap-total-section.purple {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.recap-total-label {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.recap-total-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* ============================================
+   9. BADGES & LABELS
+   ============================================ */
+
+.badge {
+    padding: 5px 10px;
+    font-weight: 500;
+    font-size: 0.75rem;
+    border-radius: 20px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-en-attente { background-color: #ffc107; color: #333; }
+.status-en-cours { background-color: #17a2b8; color: white; }
+.status-valide { background-color: #28a745; color: white; }
+.status-rejete { background-color: #dc3545; color: white; }
+.status-termine { background-color: #6c757d; color: white; }
+
+/* ============================================
+   10. BOUTONS
+   ============================================ */
+
+.btn {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: var(--transition-fast);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+    border: none;
+}
+
+.btn-lg {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+}
+
+.btn-sm {
+    padding: 5px 12px;
+    font-size: 0.85rem;
+}
+
+/* Bouton outline amélioré */
+.btn-outline-danger:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* ============================================
+   11. ALERTES
+   ============================================ */
+
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+
+/* ============================================
+   12. HISTORIQUE STATUS (TIMELINE)
+   ============================================ */
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    background: #6c757d;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #e9ecef;
+}
+
+.timeline-item.active::before {
+    background: var(--success-color);
+    box-shadow: 0 0 0 2px #d4edda;
+}
+
+.timeline-item .card {
+    margin-bottom: 0;
+}
+
+.timeline-item.active .card {
+    border-color: var(--success-color);
+}
+
+/* ============================================
+   13. PAGE DONNÉES DE BASE
+   ============================================ */
+
+.base-card .card-header {
+    padding: 12px 15px;
+}
+
+.base-card .table {
+    margin-bottom: 0;
+}
+
+.base-card .input-group {
+    margin-bottom: 15px;
+}
+
+/* ============================================
+   14. ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* ============================================
+   15. UTILITAIRES
+   ============================================ */
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.no-select {
+    user-select: none;
+}
+
+.shadow-hover:hover {
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* ============================================
+   16. RESPONSIVE
+   ============================================ */
+
+@media (max-width: 992px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        min-height: auto;
+    }
+    
+    .content {
+        margin-left: 0;
+        padding: 15px;
+    }
+    
+    .recap-card {
+        position: relative;
+        top: 0;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar a {
+        padding: 12px 15px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .btn-lg {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+    
+    .recap-total-value {
+        font-size: 1.4rem;
+    }
+    
+    .recap-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .d-flex.gap-2 {
+        flex-direction: column;
+    }
+    
+    .d-flex.gap-2 .btn {
+        width: 100%;
+    }
+}
+
+/* ============================================
+   17. IMPRESSION
+   ============================================ */
+
+@media print {
+    .sidebar {
+        display: none;
+    }
+    
+    .content {
+        margin-left: 0;
+        padding: 0;
+    }
+    
+    .btn, .alert-dismissible .btn-close {
+        display: none;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+}

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Nouvel Indicateur</title>
+    <style>
+        .level-card {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .level-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .level-card.selected-eleve { border-color: #ffc107; background-color: #fff3cd; }
+        .level-card.selected-critique { border-color: #dc3545; background-color: #f8d7da; }
+        .level-card .icon { font-size: 2rem; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-speedometer2"></i> Nouvel Indicateur</h2>
+        <a th:href="@{/indicateurs}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">Paramètres</div>
+                <div class="card-body">
+                    <form th:action="@{/indicateurs/save}" method="post" id="indicForm">
+                        
+                        <!-- Status -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Status Début *</label>
+                                <select name="statusDebutId" class="form-select" required>
+                                    <option value="">-- Sélectionner --</option>
+                                    <option th:each="s : ${statuses}"
+                                            th:value="${s.id}"
+                                            th:text="${s.libelle}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Status Fin *</label>
+                                <select name="statusFinId" class="form-select" required>
+                                    <option value="">-- Sélectionner --</option>
+                                    <option th:each="s : ${statuses}"
+                                            th:value="${s.id}"
+                                            th:text="${s.libelle}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Choix du niveau -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Niveau *</label>
+                            <input type="hidden" name="level" id="levelInput" required>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="level-card" id="cardEleve" onclick="selectLevel('eleve')">
+                                        <div class="icon" style="color: #ffc107;">
+                                            <i class="bi bi-exclamation-triangle-fill"></i>
+                                        </div>
+                                        <h5>Élevé</h5>
+                                        <small class="text-muted">Alerte jaune</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="level-card" id="cardCritique" onclick="selectLevel('critique')">
+                                        <div class="icon" style="color: #dc3545;">
+                                            <i class="bi bi-x-octagon-fill"></i>
+                                        </div>
+                                        <h5>Critique</h5>
+                                        <small class="text-muted">Alerte rouge</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Heures -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Heure début (h) *</label>
+                                <input type="number" name="heure1" class="form-control"
+                                       min="0" placeholder="Ex: 24" required
+                                       oninput="updatePreview()">
+                                <small class="text-muted">À partir de combien d'heures</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Heure fin (h) *</label>
+                                <input type="number" name="heure2" class="form-control"
+                                       min="1" placeholder="Ex: 48" required
+                                       oninput="updatePreview()">
+                                <small class="text-muted">Jusqu'à combien d'heures</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Aperçu -->
+                        <div class="alert alert-light" id="preview">
+                            <strong>Aperçu :</strong><br>
+                            Si la durée entre les 2 status est entre 
+                            <strong id="prevH1">?</strong>h et 
+                            <strong id="prevH2">?</strong>h
+                            → Niveau : <span id="prevLevel" class="badge bg-secondary">Non choisi</span>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check"></i> Enregistrer
+                            </button>
+                            <a th:href="@{/indicateurs}" class="btn btn-secondary">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectLevel(level) {
+        document.getElementById('levelInput').value = level;
+        
+        // Reset
+        document.getElementById('cardEleve').className = 'level-card';
+        document.getElementById('cardCritique').className = 'level-card';
+        
+        // Activer
+        if (level === 'eleve') {
+            document.getElementById('cardEleve').className = 'level-card selected-eleve';
+        } else {
+            document.getElementById('cardCritique').className = 'level-card selected-critique';
+        }
+        
+        updatePreview();
+    }
+    
+    function updatePreview() {
+        const h1 = document.querySelector('input[name="heure1"]').value || '?';
+        const h2 = document.querySelector('input[name="heure2"]').value || '?';
+        const level = document.getElementById('levelInput').value;
+        
+        document.getElementById('prevH1').textContent = h1;
+        document.getElementById('prevH2').textContent = h2;
+        
+        const prevLevel = document.getElementById('prevLevel');
+        if (level === 'eleve') {
+            prevLevel.className = 'badge';
+            prevLevel.style.backgroundColor = '#ffc107';
+            prevLevel.style.color = '#333';
+            prevLevel.textContent = '⚠ Élevé';
+        } else if (level === 'critique') {
+            prevLevel.className = 'badge';
+            prevLevel.style.backgroundColor = '#dc3545';
+            prevLevel.style.color = 'white';
+            prevLevel.textContent = '🔴 Critique';
+        } else {
+            prevLevel.className = 'badge bg-secondary';
+            prevLevel.textContent = 'Non choisi';
+        }
+    }
+    
+    // Validation
+    document.getElementById('indicForm').addEventListener('submit', function(e) {
+        if (!document.getElementById('levelInput').value) {
+            e.preventDefault();
+            alert('Veuillez choisir un niveau (Élevé ou Critique)');
+        }
+    });
+</script>
+</body>
+</html>

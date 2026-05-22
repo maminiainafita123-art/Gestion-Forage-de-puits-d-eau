@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Liste des Demandes</title>
+    <style>
+        .niveau-eleve { 
+            background-color: #fff3cd !important;
+            border-left: 4px solid #ffc107;
+        }
+        .niveau-critique { 
+            background-color: #f8d7da !important;
+            border-left: 4px solid #dc3545;
+        }
+        .badge-normal { background-color: #28a745; color: white; }
+        .badge-eleve { background-color: #ffc107; color: #333; }
+        .badge-critique { 
+            background-color: #dc3545; 
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-text"></i> Demandes</h2>
+        <a th:href="@{/demandes/new}" class="btn btn-primary">
+            <i class="bi bi-plus"></i> Nouvelle Demande
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Client</th>
+                        <th>Lieu</th>
+                        <th>District</th>
+                        <th>Statut</th>
+                        <th>Niveau</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="demande : ${demandes}"
+                        th:classappend="${niveaux[demande.id] == 'critique'} ? 'niveau-critique' : 
+                                        (${niveaux[demande.id] == 'eleve'} ? 'niveau-eleve' : '')">
+                        
+                        <td th:text="${demande.id}"></td>
+                        <td th:text="${#temporals.format(demande.date, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${demande.client.nom}"></td>
+                        <td th:text="${demande.lieu}"></td>
+                        <td th:text="${demande.district}"></td>
+                        <td>
+                            <span class="badge bg-info" 
+                                  th:text="${demande.dernierStatusLibelle}"></span>
+                        </td>
+                        
+                        <!-- NIVEAU -->
+                        <td>
+                            <!-- Normal -->
+                            <span th:if="${niveaux[demande.id] == null || niveaux[demande.id] == 'normal'}"
+                                  class="badge badge-normal">
+                                <i class="bi bi-check-circle"></i> Normal
+                            </span>
+                            
+                            <!-- Élevé -->
+                            <span th:if="${niveaux[demande.id] == 'eleve'}"
+                                  class="badge badge-eleve">
+                                <i class="bi bi-exclamation-triangle"></i> Élevé
+                                <span th:if="${niveauxDetail[demande.id] != null}"
+                                      th:text="'(' + ${niveauxDetail[demande.id].dureeHeures} + 'h)'">
+                                </span>
+                            </span>
+                            
+                            <!-- Critique -->
+                            <span th:if="${niveaux[demande.id] == 'critique'}"
+                                  class="badge badge-critique">
+                                <i class="bi bi-x-octagon"></i> CRITIQUE
+                                <span th:if="${niveauxDetail[demande.id] != null}"
+                                      th:text="'(' + ${niveauxDetail[demande.id].dureeHeures} + 'h)'">
+                                </span>
+                            </span>
+                        </td>
+                        
+                        <td>
+                            <a th:href="@{/demandes/{id}(id=${demande.id})}" 
+                               class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a th:href="@{/demandes/{id}/edit(id=${demande.id})}" 
+                               class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a th:href="@{/demandes/{id}/delete(id=${demande.id})}"
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Supprimer ?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(demandes)}">
+                        <td colspan="8" class="text-center text-muted py-4">Aucune demande</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
